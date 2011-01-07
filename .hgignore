@@ -1,0 +1,12 @@
+# maven directories
+^target/
+/target/
+
+# intellij files and directories
+^\.idea/
+\.iml$
+
+# eclipse files and directories
+^\.settings/
+\.classpath
+\.project
