@@ -43,7 +43,7 @@ public abstract class AbstractHttpCache implements HttpCache {
         List<Header> list = new ArrayList<Header>();
         for (String line = readLine(r); line.length() > 0; line = readLine(r)) {
             int i = line.indexOf(": ");
-            Header h = new BasicHeader(line.substring(i), line.substring(i+2));
+            Header h = new BasicHeader(line.substring(0, i), line.substring(i+2));
             list.add(h);
         }
         return list;
