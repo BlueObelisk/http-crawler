@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,19 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wwmm.pubcrawler.httpcrawler;
 
-import org.joda.time.Duration;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache;
 
+import org.apache.http.Header;
+
+import java.io.IOException;
 import java.net.URI;
 
 /**
  * @author Sam Adams
  */
-public class CrawlerGetRequest extends CrawlerRequest {
+public interface HttpCache {
 
-    public CrawlerGetRequest(URI url, String id, Duration maxAge) {
-        super(url, id, maxAge);
-    }
-    
+    CacheResponse get(CacheRequest request) throws IOException;
+
+    void store(String id, URI url, Header[] headers, byte[] bytes) throws IOException;
+
 }

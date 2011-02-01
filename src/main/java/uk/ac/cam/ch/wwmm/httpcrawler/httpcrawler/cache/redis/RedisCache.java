@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package wwmm.pubcrawler.httpcrawler.cache.redis;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.redis;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.joda.time.DateTime;
 import redis.clients.jedis.Jedis;
-import wwmm.pubcrawler.httpcrawler.cache.AbstractHttpCache;
-import wwmm.pubcrawler.httpcrawler.cache.CacheRequest;
-import wwmm.pubcrawler.httpcrawler.cache.CacheResponse;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.AbstractHttpCache;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheRequest;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheResponse;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

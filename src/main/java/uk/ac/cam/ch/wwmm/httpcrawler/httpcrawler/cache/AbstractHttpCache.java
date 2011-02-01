@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package wwmm.pubcrawler.httpcrawler.cache;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;

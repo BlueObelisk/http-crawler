@@ -13,37 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wwmm.pubcrawler.httpcrawler;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler;
 
+import org.apache.http.NameValuePair;
 import org.joda.time.Duration;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Sam Adams
  */
-public class CrawlerRequest {
+public class CrawlerPostRequest extends CrawlerRequest {
 
-    private final String id;
-    private final URI url;
-    private final Duration maxAge;
+    private final List<NameValuePair> parameters;
 
-    public CrawlerRequest(URI url, String id, Duration maxAge) {
-        this.url = url;
-        this.id = id;
-        this.maxAge = maxAge;
+    public CrawlerPostRequest(URI uri, List<? extends NameValuePair> parameters, String id, Duration maxAge) {
+        super(uri, id, maxAge);
+        this.parameters = new ArrayList<NameValuePair>(parameters);
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public URI getUrl() {
-        return url;
-    }
-
-    public Duration getMaxAge() {
-        return maxAge;
+    public List<NameValuePair> getParameters() {
+        return Collections.unmodifiableList(parameters);
     }
 
 }

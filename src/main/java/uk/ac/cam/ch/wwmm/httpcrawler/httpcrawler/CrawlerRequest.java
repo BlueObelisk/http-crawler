@@ -13,32 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wwmm.pubcrawler.httpcrawler.cache;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler;
 
-import org.apache.http.Header;
-import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
-import java.io.InputStream;
 import java.net.URI;
-import java.util.List;
 
 /**
  * @author Sam Adams
  */
-public class CacheResponse {
+public class CrawlerRequest {
 
     private final String id;
     private final URI url;
-    private final List<Header> headers;
-    private final InputStream content;
-    private final DateTime cached;
+    private final Duration maxAge;
 
-    public CacheResponse(String id, URI url, List<Header> headers, InputStream content, DateTime cached) {
-        this.id = id;
+    public CrawlerRequest(URI url, String id, Duration maxAge) {
         this.url = url;
-        this.headers = headers;
-        this.content = content;
-        this.cached = cached;
+        this.id = id;
+        this.maxAge = maxAge;
     }
 
     public String getId() {
@@ -49,16 +42,8 @@ public class CacheResponse {
         return url;
     }
 
-    public List<Header> getHeaders() {
-        return headers;
+    public Duration getMaxAge() {
+        return maxAge;
     }
 
-    public InputStream getContent() {
-        return content;
-    }
-
-    public DateTime getCached() {
-        return cached;
-    }
-    
 }

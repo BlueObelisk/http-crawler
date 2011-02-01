@@ -13,24 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wwmm.pubcrawler.httpcrawler.cache.file;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
-import org.apache.http.message.BasicHeader;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import wwmm.pubcrawler.httpcrawler.cache.AbstractHttpCache;
-import wwmm.pubcrawler.httpcrawler.cache.CacheRequest;
-import wwmm.pubcrawler.httpcrawler.cache.CacheResponse;
-import wwmm.pubcrawler.httpcrawler.cache.HttpCache;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.AbstractHttpCache;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheRequest;
+import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheResponse;
 
 import java.io.*;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

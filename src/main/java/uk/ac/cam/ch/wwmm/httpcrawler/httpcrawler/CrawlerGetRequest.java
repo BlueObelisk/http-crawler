@@ -13,30 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package wwmm.pubcrawler.httpcrawler;
+package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler;
 
-import org.apache.http.NameValuePair;
 import org.joda.time.Duration;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Sam Adams
  */
-public class CrawlerPostRequest extends CrawlerRequest {
+public class CrawlerGetRequest extends CrawlerRequest {
 
-    private final List<NameValuePair> parameters;
-
-    public CrawlerPostRequest(URI uri, List<? extends NameValuePair> parameters, String id, Duration maxAge) {
-        super(uri, id, maxAge);
-        this.parameters = new ArrayList<NameValuePair>(parameters);
+    public CrawlerGetRequest(URI url, String id, Duration maxAge) {
+        super(url, id, maxAge);
     }
-
-    public List<NameValuePair> getParameters() {
-        return Collections.unmodifiableList(parameters);
-    }
-
+    
 }
