@@ -62,9 +62,11 @@ public class CrawlerResponse {
         return null;
     }
 
-    public void close() throws IOException {
-        IOUtils.copy(getContent(), NullOutputStream.NULL_OUTPUT_STREAM);
-        getContent().close();
+    public void closeQuietly() {
+        try {
+            IOUtils.copy(getContent(), NullOutputStream.NULL_OUTPUT_STREAM);
+            getContent().close();
+        } catch (IOException e) { }
     }
 
     public Header getContentType() {

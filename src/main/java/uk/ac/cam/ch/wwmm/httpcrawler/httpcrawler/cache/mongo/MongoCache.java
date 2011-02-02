@@ -16,10 +16,7 @@
 
 package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.mongo;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
@@ -60,7 +57,8 @@ public class MongoCache extends AbstractHttpCache {
         DBObject doc = col.findOne(query);
         if (doc != null) {
             URI url = URI.create((String) doc.get("url"));
-            List<Header> headers = getHeaders((String[])doc.get("headers"));
+            BasicDBList list = (BasicDBList) doc.get("headers");
+            List<Header> headers = getHeaders(list);
             DateTime cached = DTF.parseDateTime((String)doc.get("timestamp"));
             InputStream in = uncompress((byte[])doc.get("content"));
             CacheResponse response = new CacheResponse(id, url, headers, in, cached);
@@ -74,9 +72,10 @@ public class MongoCache extends AbstractHttpCache {
         return new GZIPInputStream(content);
     }
 
-    private List<Header> getHeaders(String[] s) {
+    private List<Header> getHeaders(List<?> s) {
         List<Header> list = new ArrayList<Header>();
-        for (String line : s) {
+        for (Object o : s) {
+            String line = (String) o;
             int i = line.indexOf(':');
             Header h = new BasicHeader(line.substring(i), line.substring(i+2));
             list.add(h);
