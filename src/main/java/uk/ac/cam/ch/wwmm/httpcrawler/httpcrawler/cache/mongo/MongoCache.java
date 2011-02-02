@@ -31,6 +31,7 @@ import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheResponse;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,12 +62,16 @@ public class MongoCache extends AbstractHttpCache {
             URI url = URI.create((String) doc.get("url"));
             List<Header> headers = getHeaders((String[])doc.get("headers"));
             DateTime cached = DTF.parseDateTime((String)doc.get("timestamp"));
-            ByteArrayInputStream content = new ByteArrayInputStream((byte[])doc.get("content"));
-            GZIPInputStream in = new GZIPInputStream(content);
+            InputStream in = uncompress((byte[])doc.get("content"));
             CacheResponse response = new CacheResponse(id, url, headers, in, cached);
             return response;
         }
         return null;
+    }
+
+    private InputStream uncompress(byte[] bytes) throws IOException {
+        ByteArrayInputStream content = new ByteArrayInputStream(bytes);
+        return new GZIPInputStream(content);
     }
 
     private List<Header> getHeaders(String[] s) {
@@ -90,11 +95,17 @@ public class MongoCache extends AbstractHttpCache {
         doc.put("url", url.toString());
         doc.put("headers", getHeaderStrings(headers));
         doc.put("timestamp", DTF.print(timestamp));
+        byte[] content = compress(bytes);
+        doc.put("content", content);
+        col.save(doc);
+    }
+
+    private byte[] compress(byte[] bytes) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         GZIPOutputStream out = new GZIPOutputStream(buffer);
         out.write(bytes);
-        doc.put("content", buffer.toByteArray());
-        col.save(doc);
+        out.close();
+        return buffer.toByteArray();
     }
 
     private String getContentString(byte[] bytes) throws IOException {
