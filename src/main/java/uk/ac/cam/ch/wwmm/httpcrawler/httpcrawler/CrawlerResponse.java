@@ -33,7 +33,7 @@ public class CrawlerResponse {
 
     private final URI url;
     private final List<Header> headers;
-    private final InputStream content;
+    private InputStream content;
 
     public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content) {
         this.url = url;
@@ -46,6 +46,9 @@ public class CrawlerResponse {
     }
 
     public InputStream getContent() {
+        if (content == null) {
+            throw new IllegalStateException("Stream closed");
+        }
         return content;
     }
 
@@ -64,9 +67,19 @@ public class CrawlerResponse {
 
     public void closeQuietly() {
         try {
-            IOUtils.copy(getContent(), NullOutputStream.NULL_OUTPUT_STREAM);
-            getContent().close();
+            close();
         } catch (IOException e) { }
+    }
+
+    public synchronized void close() throws IOException {
+        if (content != null) {
+            try {
+                IOUtils.copy(content, NullOutputStream.NULL_OUTPUT_STREAM);
+                content.close();
+            } finally {
+                content = null;
+            }
+        }
     }
 
     public Header getContentType() {
