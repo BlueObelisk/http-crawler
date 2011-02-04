@@ -13,15 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.file;
+package uk.ac.cam.ch.wwmm.httpcrawler.cache.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.joda.time.DateTime;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.AbstractHttpCache;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheRequest;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheResponse;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.AbstractHttpCache;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheRequest;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheResponse;
 
 import java.io.*;
 import java.net.URI;

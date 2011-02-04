@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache;
+package uk.ac.cam.ch.wwmm.httpcrawler.cache;
 
 import org.apache.http.Header;
 import org.joda.time.DateTime;

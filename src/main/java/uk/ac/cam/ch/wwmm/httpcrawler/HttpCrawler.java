@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler;
+package uk.ac.cam.ch.wwmm.httpcrawler;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
@@ -28,9 +28,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheRequest;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.CacheResponse;
-import uk.ac.cam.ch.wwmm.httpcrawler.httpcrawler.cache.HttpCache;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheRequest;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheResponse;
+import uk.ac.cam.ch.wwmm.httpcrawler.cache.HttpCache;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
