@@ -50,6 +50,7 @@ public class HttpCrawler {
     private HttpCache cache;
     private HttpClient client;
 
+    private int maxRetries = 3;
     private long requestStepMillis = 1000l;
     private long lastRequestTime;
 
@@ -106,9 +107,10 @@ public class HttpCrawler {
         }
 
         HttpCache cache = getCache();
+        CacheResponse cacheResponse = null;
         if (cache != null) {
             CacheRequest cacheRequest = getCacheRequest(request);
-            CacheResponse cacheResponse = cache.get(cacheRequest);
+            cacheResponse = cache.get(cacheRequest);
             if (cacheResponse != null) {
                 if (isUpToDate(request, cacheResponse)) {
                     LOG.trace("Cache hit: "+request.getId());
@@ -124,17 +126,22 @@ public class HttpCrawler {
         HttpUriRequest httpRequest = createHttpRequest(request);
         HttpContext httpContext = new BasicHttpContext();
         HttpResponse httpResponse = null;
-        int retry = 3;
+        int remainingAttempts = maxRetries;
         Exception lastEx = null;
-        while (httpResponse == null && retry > 0) {
-            retry--;
+        while (httpResponse == null && remainingAttempts > 0) {
+            remainingAttempts--;
             try {
                 LOG.debug("Issuing HTTP "+httpRequest.getMethod()+" "+httpRequest.getURI());
                 httpResponse = getClient().execute(httpRequest, httpContext);
             } catch (IOException e) {
                 LOG.warn("Error fetching "+httpRequest.getURI()
-                        + (retry > 0 ? " [retrying]" : ""), e);
-                if (retry == 0) {
+                        + (remainingAttempts > 0 ? " [retrying]" : ""), e);
+                if (remainingAttempts == 0) {
+                    if (cacheResponse != null) {
+                        // Return stale response
+                        LOG.error("Failed to fetch "+httpRequest.getURI()+" ... using stale version", lastEx);
+                        return createResponse(cacheResponse, true);
+                    }
                     throw new IOException("Failed to fetch "+httpRequest.getURI(), lastEx);
                 }
                 try {
@@ -142,7 +149,6 @@ public class HttpCrawler {
                 } catch (InterruptedException e1) {
                     e.printStackTrace();
                 }
-
             }
         }
         try {
@@ -173,7 +179,7 @@ public class HttpCrawler {
     private CrawlerResponse createResponse(URI url, Header[] headers, byte[] bytes) {
         List<Header> headerList = Arrays.asList(headers);
         InputStream content = new ByteArrayInputStream(bytes);
-        CrawlerResponse response = new CrawlerResponse(url, headerList, content);
+        CrawlerResponse response = new CrawlerResponse(url, headerList, content, false);
         return response;
     }
 
@@ -240,10 +246,15 @@ public class HttpCrawler {
     }
 
     private CrawlerResponse createResponse(CacheResponse cacheResponse) {
+        return createResponse(cacheResponse, false);
+    }
+
+    private CrawlerResponse createResponse(CacheResponse cacheResponse, boolean stale) {
         CrawlerResponse response = new CrawlerResponse(
                 cacheResponse.getUrl(),
                 cacheResponse.getHeaders(),
-                cacheResponse.getContent()
+                cacheResponse.getContent(),
+                stale
         );
         return response;
     }

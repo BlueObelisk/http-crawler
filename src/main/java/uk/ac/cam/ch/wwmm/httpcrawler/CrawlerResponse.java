@@ -34,15 +34,21 @@ public class CrawlerResponse {
     private final URI url;
     private final List<Header> headers;
     private InputStream content;
+    private final boolean stale;
 
-    public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content) {
+    public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content, boolean stale) {
         this.url = url;
         this.headers = new ArrayList<Header>(headers);
         this.content = content;
+        this.stale = true;
     }
 
     public URI getUrl() {
         return url;
+    }
+
+    public boolean isStale() {
+        return stale;
     }
 
     public InputStream getContent() {
