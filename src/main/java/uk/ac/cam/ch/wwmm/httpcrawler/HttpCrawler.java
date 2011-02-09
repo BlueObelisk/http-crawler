@@ -100,6 +100,19 @@ public class HttpCrawler {
     }
 
 
+    public CrawlerResponse fetchFromCache(String id) throws IOException {
+        HttpCache cache = getCache();
+        if (cache != null) {
+            CacheRequest cacheRequest = new CacheRequest(id);
+            CacheResponse cacheResponse = cache.get(cacheRequest);
+            if (cacheResponse != null) {
+                return createResponse(cacheResponse);
+            }
+        }
+        return null;
+    }
+
+
     public CrawlerResponse execute(CrawlerRequest request) throws IOException {
 
         if (request.getId().startsWith("null")) {
@@ -160,6 +173,7 @@ public class HttpCrawler {
                 cacheResponse(request.getId(), url, headers, bytes);
                 return createResponse(url, headers, bytes);
             } else {
+                httpResponse.getEntity().writeTo(System.err);
                 throw new IOException("Crawler failed ["+request.getUrl()+"] "+httpResponse.getStatusLine());
             }
 
