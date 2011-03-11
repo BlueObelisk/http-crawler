@@ -47,7 +47,8 @@ public class MongoCache extends AbstractHttpCache {
         this.db = db;
         this.col = db.getCollection(collection);
         // Create index
-         col.createIndex(new BasicDBObject("id", 1));
+        BasicDBObject keys = new BasicDBObject("id", 1);
+        col.ensureIndex(keys, DBCollection.genIndexName(keys), true);
     }
 
     public CacheResponse get(CacheRequest request) throws IOException {
@@ -96,7 +97,9 @@ public class MongoCache extends AbstractHttpCache {
         doc.put("timestamp", DTF.print(timestamp));
         byte[] content = compress(bytes);
         doc.put("content", content);
-        col.save(doc);
+
+        BasicDBObject query = new BasicDBObject("id", id);
+        col.update(query, doc, true, false);
     }
 
     private byte[] compress(byte[] bytes) throws IOException {
