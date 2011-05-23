@@ -22,7 +22,7 @@ import java.net.URI;
 /**
  * @author Sam Adams
  */
-public class CrawlerRequest {
+public abstract class CrawlerRequest {
 
     private final String id;
     private final URI url;

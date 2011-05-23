@@ -17,7 +17,9 @@
 package uk.ac.cam.ch.wwmm.httpcrawler.cache.mongo;
 
 import com.mongodb.*;
-import org.apache.commons.io.IOUtils;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSDBFile;
+import com.mongodb.gridfs.GridFSInputFile;
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.joda.time.DateTime;
@@ -25,7 +27,6 @@ import uk.ac.cam.ch.wwmm.httpcrawler.cache.AbstractHttpCache;
 import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheRequest;
 import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheResponse;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,36 +42,30 @@ import java.util.zip.GZIPOutputStream;
 public class MongoCache extends AbstractHttpCache {
 
     private DB db;
-    private DBCollection col;
+    private GridFS fs;
 
     public MongoCache(DB db, String collection) {
         this.db = db;
-        this.col = db.getCollection(collection);
-        // Create index
-        BasicDBObject keys = new BasicDBObject("id", 1);
-        col.ensureIndex(keys, DBCollection.genIndexName(keys), true);
+
+        this.fs = new GridFS(db, collection);
+        this.db.getCollection(collection + ".files").ensureIndex(
+                BasicDBObjectBuilder.start().add("filename", 1).add("unique", true).get());
     }
 
     public CacheResponse get(CacheRequest request) throws IOException {
-        String id = request.getId();
+        String filename = request.getId();
 
-        BasicDBObject query = new BasicDBObject("id", id);
-        DBObject doc = col.findOne(query);
-        if (doc != null) {
-            URI url = URI.create((String) doc.get("url"));
-            BasicDBList list = (BasicDBList) doc.get("headers");
+        GridFSDBFile file = fs.findOne(filename);
+        if (file != null) {
+            URI url = URI.create((String) file.get("url"));
+            BasicDBList list = (BasicDBList) file.get("headers");
             List<Header> headers = getHeaders(list);
-            DateTime cached = DTF.parseDateTime((String)doc.get("timestamp"));
-            InputStream in = uncompress((byte[])doc.get("content"));
-            CacheResponse response = new CacheResponse(id, url, headers, in, cached);
+            DateTime cached = DTF.parseDateTime((String) file.get("timestamp"));
+            InputStream in = new GZIPInputStream(file.getInputStream());
+            CacheResponse response = new CacheResponse(filename, url, headers, in, cached);
             return response;
         }
         return null;
-    }
-
-    private InputStream uncompress(byte[] bytes) throws IOException {
-        ByteArrayInputStream content = new ByteArrayInputStream(bytes);
-        return new GZIPInputStream(content);
     }
 
     private List<Header> getHeaders(List<?> s) {
@@ -84,22 +79,22 @@ public class MongoCache extends AbstractHttpCache {
         return list;
     }
 
-    public void store(String id, URI url, Header[] headers, byte[] bytes) throws IOException {
+    public void store(String filename, URI url, Header[] headers, byte[] bytes) throws IOException {
         DateTime now = new DateTime();
-        store(id, url, headers, now, bytes);
+        store(filename, url, headers, now, bytes);
     }
 
-    public void store(String id, URI url, Header[] headers, DateTime timestamp, byte[] bytes) throws IOException {
-        BasicDBObject doc = new BasicDBObject();
-        doc.put("id", id);
-        doc.put("url", url.toString());
-        doc.put("headers", getHeaderStrings(headers));
-        doc.put("timestamp", DTF.print(timestamp));
+    public void store(String filename, URI url, Header[] headers, DateTime timestamp, byte[] bytes) throws IOException {
         byte[] content = compress(bytes);
-        doc.put("content", content);
 
-        BasicDBObject query = new BasicDBObject("id", id);
-        col.update(query, doc, true, false);
+        GridFSInputFile file = fs.createFile(content);
+        file.setFilename(filename);
+        DBObject metaData = file.getMetaData();
+        metaData.put("url", url.toString());
+        metaData.put("headers", getHeaderStrings(headers));
+        metaData.put("timestamp", DTF.print(timestamp));
+        fs.remove(filename);
+        file.save();
     }
 
     private byte[] compress(byte[] bytes) throws IOException {
@@ -108,15 +103,6 @@ public class MongoCache extends AbstractHttpCache {
         out.write(bytes);
         out.close();
         return buffer.toByteArray();
-    }
-
-    private String getContentString(byte[] bytes) throws IOException {
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-        try {
-            return readUtf8String(in);
-        } finally {
-            IOUtils.closeQuietly(in);
-        }
     }
 
     private List<String> getHeaderStrings(Header[] headers) {
