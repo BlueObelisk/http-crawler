@@ -89,10 +89,9 @@ public class MongoCache extends AbstractHttpCache {
 
         GridFSInputFile file = fs.createFile(content);
         file.setFilename(filename);
-        DBObject metaData = file.getMetaData();
-        metaData.put("url", url.toString());
-        metaData.put("headers", getHeaderStrings(headers));
-        metaData.put("timestamp", DTF.print(timestamp));
+        file.put("url", url.toString());
+        file.put("headers", getHeaderStrings(headers));
+        file.put("timestamp", DTF.print(timestamp));
         fs.remove(filename);
         file.save();
     }
