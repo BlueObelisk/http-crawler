@@ -171,7 +171,7 @@ public class HttpCrawler {
                 byte[] bytes = readEntity(httpResponse);
                 Header[] headers = httpResponse.getAllHeaders();
                 cacheResponse(request.getId(), url, headers, bytes);
-                return createResponse(url, headers, bytes);
+                return createResponse(url, headers, bytes, false, false);
             } else {
                 httpResponse.getEntity().writeTo(System.err);
                 throw new IOException("Crawler failed ["+request.getUrl()+"] "+httpResponse.getStatusLine());
@@ -190,10 +190,10 @@ public class HttpCrawler {
         }
     }
 
-    private CrawlerResponse createResponse(URI url, Header[] headers, byte[] bytes) {
+    private CrawlerResponse createResponse(URI url, Header[] headers, byte[] bytes, boolean fromCache, boolean stale) {
         List<Header> headerList = Arrays.asList(headers);
         InputStream content = new ByteArrayInputStream(bytes);
-        CrawlerResponse response = new CrawlerResponse(url, headerList, content, false);
+        CrawlerResponse response = new CrawlerResponse(url, headerList, content, fromCache, stale);
         return response;
     }
 
@@ -268,6 +268,7 @@ public class HttpCrawler {
                 cacheResponse.getUrl(),
                 cacheResponse.getHeaders(),
                 cacheResponse.getContent(),
+                true,
                 stale
         );
         return response;

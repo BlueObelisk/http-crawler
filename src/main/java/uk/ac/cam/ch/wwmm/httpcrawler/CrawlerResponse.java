@@ -35,16 +35,22 @@ public class CrawlerResponse {
     private final List<Header> headers;
     private InputStream content;
     private final boolean stale;
+    private final boolean fromCache;
 
-    public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content, boolean stale) {
+    public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content, boolean fromCache, boolean stale) {
         this.url = url;
         this.headers = new ArrayList<Header>(headers);
         this.content = content;
+        this.fromCache = fromCache;
         this.stale = true;
     }
 
     public URI getUrl() {
         return url;
+    }
+
+    public boolean isFromCache() {
+        return fromCache;
     }
 
     public boolean isStale() {
