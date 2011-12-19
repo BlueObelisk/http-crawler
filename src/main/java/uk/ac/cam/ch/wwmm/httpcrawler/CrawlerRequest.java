@@ -28,7 +28,7 @@ public abstract class CrawlerRequest {
     private final URI url;
     private final Duration maxAge;
 
-    public CrawlerRequest(URI url, String id, Duration maxAge) {
+    public CrawlerRequest(final URI url, final String id, final Duration maxAge) {
         this.url = url;
         this.id = id;
         this.maxAge = maxAge;

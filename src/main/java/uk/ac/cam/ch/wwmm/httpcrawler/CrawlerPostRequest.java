@@ -30,7 +30,7 @@ public class CrawlerPostRequest extends CrawlerRequest {
 
     private final List<NameValuePair> parameters;
 
-    public CrawlerPostRequest(URI uri, List<? extends NameValuePair> parameters, String id, Duration maxAge) {
+    public CrawlerPostRequest(final URI uri, final List<? extends NameValuePair> parameters, final String id, final Duration maxAge) {
         super(uri, id, maxAge);
         this.parameters = new ArrayList<NameValuePair>(parameters);
     }

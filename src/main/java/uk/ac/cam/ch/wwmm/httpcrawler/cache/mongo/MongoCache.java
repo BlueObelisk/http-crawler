@@ -41,10 +41,10 @@ import java.util.zip.GZIPOutputStream;
  */
 public class MongoCache extends AbstractHttpCache {
 
-    private DB db;
-    private GridFS fs;
+    private final DB db;
+    private final GridFS fs;
 
-    public MongoCache(DB db, String collection) {
+    public MongoCache(final DB db, final String collection) {
         this.db = db;
 
         this.fs = new GridFS(db, collection);
@@ -52,42 +52,42 @@ public class MongoCache extends AbstractHttpCache {
                 BasicDBObjectBuilder.start().add("filename", 1).add("unique", true).get());
     }
 
-    public CacheResponse get(CacheRequest request) throws IOException {
-        String filename = request.getId();
+    public CacheResponse get(final CacheRequest request) throws IOException {
+        final String filename = request.getId();
 
-        GridFSDBFile file = fs.findOne(filename);
+        final GridFSDBFile file = fs.findOne(filename);
         if (file != null) {
-            URI url = URI.create((String) file.get("url"));
-            BasicDBList list = (BasicDBList) file.get("headers");
-            List<Header> headers = getHeaders(list);
-            DateTime cached = DTF.parseDateTime((String) file.get("timestamp"));
-            InputStream in = new GZIPInputStream(file.getInputStream());
-            CacheResponse response = new CacheResponse(filename, url, headers, in, cached);
+            final URI url = URI.create((String) file.get("url"));
+            final BasicDBList list = (BasicDBList) file.get("headers");
+            final List<Header> headers = getHeaders(list);
+            final DateTime cached = DTF.parseDateTime((String) file.get("timestamp"));
+            final InputStream in = new GZIPInputStream(file.getInputStream());
+            final CacheResponse response = new CacheResponse(filename, url, headers, in, cached);
             return response;
         }
         return null;
     }
 
-    private List<Header> getHeaders(List<?> s) {
-        List<Header> list = new ArrayList<Header>();
-        for (Object o : s) {
-            String line = (String) o;
-            int i = line.indexOf(':');
-            Header h = new BasicHeader(line.substring(i), line.substring(i+2));
+    private List<Header> getHeaders(final List<?> s) {
+        final List<Header> list = new ArrayList<Header>();
+        for (final Object o : s) {
+            final String line = (String) o;
+            final int i = line.indexOf(':');
+            final Header h = new BasicHeader(line.substring(i), line.substring(i+2));
             list.add(h);
         }
         return list;
     }
 
-    public void store(String filename, URI url, Header[] headers, byte[] bytes) throws IOException {
-        DateTime now = new DateTime();
+    public void store(final String filename, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
+        final DateTime now = new DateTime();
         store(filename, url, headers, now, bytes);
     }
 
-    public void store(String filename, URI url, Header[] headers, DateTime timestamp, byte[] bytes) throws IOException {
-        byte[] content = compress(bytes);
+    public void store(final String filename, final URI url, final Header[] headers, final DateTime timestamp, final byte[] bytes) throws IOException {
+        final byte[] content = compress(bytes);
 
-        GridFSInputFile file = fs.createFile(content);
+        final GridFSInputFile file = fs.createFile(content);
         file.setFilename(filename);
         file.put("url", url.toString());
         file.put("headers", getHeaderStrings(headers));
@@ -96,17 +96,17 @@ public class MongoCache extends AbstractHttpCache {
         file.save();
     }
 
-    private byte[] compress(byte[] bytes) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        GZIPOutputStream out = new GZIPOutputStream(buffer);
+    private byte[] compress(final byte[] bytes) throws IOException {
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        final GZIPOutputStream out = new GZIPOutputStream(buffer);
         out.write(bytes);
         out.close();
         return buffer.toByteArray();
     }
 
-    private List<String> getHeaderStrings(Header[] headers) {
-        List<String> list = new ArrayList<String>();
-        for (Header h : headers) {
+    private List<String> getHeaderStrings(final Header[] headers) {
+        final List<String> list = new ArrayList<String>();
+        for (final Header h : headers) {
             list.add(h.getName() + ": " + h.getValue());
         }
         return list;

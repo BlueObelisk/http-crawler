@@ -33,7 +33,7 @@ public class CacheResponse {
     private final InputStream content;
     private final DateTime cached;
 
-    public CacheResponse(String id, URI url, List<Header> headers, InputStream content, DateTime cached) {
+    public CacheResponse(final String id, final URI url, final List<Header> headers, final InputStream content, final DateTime cached) {
         this.id = id;
         this.url = url;
         this.headers = headers;

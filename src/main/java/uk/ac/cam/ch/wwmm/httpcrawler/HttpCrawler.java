@@ -47,19 +47,19 @@ public class HttpCrawler {
 
     private static final Logger LOG = Logger.getLogger(HttpCrawler.class);
 
-    private HttpCache cache;
-    private HttpClient client;
+    private final HttpCache cache;
+    private final HttpClient client;
 
-    private int maxRetries = 3;
+    private final int maxRetries = 3;
     private long requestStepMillis = 1000l;
     private long lastRequestTime;
 
-    public HttpCrawler(HttpClient client) {
+    public HttpCrawler(final HttpClient client) {
         this.client = client;
         this.cache = null;
     }
 
-    public HttpCrawler(HttpClient client, HttpCache cache) {
+    public HttpCrawler(final HttpClient client, final HttpCache cache) {
         this.client = client;
         this.cache = cache;
     }
@@ -72,7 +72,7 @@ public class HttpCrawler {
         return client;
     }
 
-    private void sleepUntil(long time) {
+    private void sleepUntil(final long time) {
         long now = System.currentTimeMillis();
         while (now < time) {
             try {
@@ -95,16 +95,16 @@ public class HttpCrawler {
         return requestStepMillis;
     }
 
-    public void setRequestStepMillis(long requestStepMillis) {
+    public void setRequestStepMillis(final long requestStepMillis) {
         this.requestStepMillis = requestStepMillis;
     }
 
 
-    public CrawlerResponse fetchFromCache(String id) throws IOException {
-        HttpCache cache = getCache();
+    public CrawlerResponse fetchFromCache(final String id) throws IOException {
+        final HttpCache cache = getCache();
         if (cache != null) {
-            CacheRequest cacheRequest = new CacheRequest(id);
-            CacheResponse cacheResponse = cache.get(cacheRequest);
+            final CacheRequest cacheRequest = new CacheRequest(id);
+            final CacheResponse cacheResponse = cache.get(cacheRequest);
             if (cacheResponse != null) {
                 return createResponse(cacheResponse);
             }
@@ -113,16 +113,16 @@ public class HttpCrawler {
     }
 
 
-    public CrawlerResponse execute(CrawlerRequest request) throws IOException {
+    public CrawlerResponse execute(final CrawlerRequest request) throws IOException {
 
         if (request.getId().startsWith("null")) {
             throw new IOException("Null ID: "+request.getId());
         }
 
-        HttpCache cache = getCache();
+        final HttpCache cache = getCache();
         CacheResponse cacheResponse = null;
         if (cache != null) {
-            CacheRequest cacheRequest = getCacheRequest(request);
+            final CacheRequest cacheRequest = getCacheRequest(request);
             cacheResponse = cache.get(cacheRequest);
             if (cacheResponse != null) {
                 if (isUpToDate(request, cacheResponse)) {
@@ -136,11 +136,11 @@ public class HttpCrawler {
             }
         }
 
-        HttpUriRequest httpRequest = createHttpRequest(request);
-        HttpContext httpContext = new BasicHttpContext();
+        final HttpUriRequest httpRequest = createHttpRequest(request);
+        final HttpContext httpContext = new BasicHttpContext();
         HttpResponse httpResponse = null;
         int remainingAttempts = maxRetries;
-        Exception lastEx = null;
+        final Exception lastEx = null;
         while (httpResponse == null && remainingAttempts > 0) {
             remainingAttempts--;
             try {
@@ -167,9 +167,9 @@ public class HttpCrawler {
         try {
 
             if (isSuccess(httpResponse)) {
-                URI url = getResponseUrl(httpRequest, httpContext);
-                byte[] bytes = readEntity(httpResponse);
-                Header[] headers = httpResponse.getAllHeaders();
+                final URI url = getResponseUrl(httpRequest, httpContext);
+                final byte[] bytes = readEntity(httpResponse);
+                final Header[] headers = httpResponse.getAllHeaders();
                 cacheResponse(request.getId(), url, headers, bytes);
                 return createResponse(url, headers, bytes, false, false);
             } else {
@@ -183,42 +183,42 @@ public class HttpCrawler {
     }
 
 
-    private void cacheResponse(String id, URI url, Header[] headers, byte[] bytes) throws IOException {
+    private void cacheResponse(final String id, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
         if (getCache() != null) {
             LOG.trace("Cached: "+id);
             getCache().store(id, url, headers, bytes);
         }
     }
 
-    private CrawlerResponse createResponse(URI url, Header[] headers, byte[] bytes, boolean fromCache, boolean stale) {
-        List<Header> headerList = Arrays.asList(headers);
-        InputStream content = new ByteArrayInputStream(bytes);
-        CrawlerResponse response = new CrawlerResponse(url, headerList, content, fromCache, stale);
+    private CrawlerResponse createResponse(final URI url, final Header[] headers, final byte[] bytes, final boolean fromCache, final boolean stale) {
+        final List<Header> headerList = Arrays.asList(headers);
+        final InputStream content = new ByteArrayInputStream(bytes);
+        final CrawlerResponse response = new CrawlerResponse(url, headerList, content, fromCache, stale);
         return response;
     }
 
-    private byte[] readEntity(HttpResponse httpResponse) throws IOException {
-        HttpEntity entity = httpResponse.getEntity();
+    private byte[] readEntity(final HttpResponse httpResponse) throws IOException {
+        final HttpEntity entity = httpResponse.getEntity();
         if (entity == null) {
             return new byte[0];
         }
         return IOUtils.toByteArray(entity.getContent());
     }
 
-    private URI getResponseUrl(HttpUriRequest httpRequest, HttpContext httpContext) {
-        HttpHost host = (HttpHost) httpContext.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
-        HttpUriRequest request = (HttpUriRequest) httpContext.getAttribute(ExecutionContext.HTTP_REQUEST);
+    private URI getResponseUrl(final HttpUriRequest httpRequest, final HttpContext httpContext) {
+        final HttpHost host = (HttpHost) httpContext.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+        final HttpUriRequest request = (HttpUriRequest) httpContext.getAttribute(ExecutionContext.HTTP_REQUEST);
         if (host == null || request == null) {
             return httpRequest.getURI();
         }
         return URI.create(host.toURI()).resolve(request.getURI());
     }
 
-    private boolean isSuccess(HttpResponse httpResponse) {
+    private boolean isSuccess(final HttpResponse httpResponse) {
         return HttpStatus.SC_OK == httpResponse.getStatusLine().getStatusCode();
     }
 
-    private HttpUriRequest createHttpRequest(CrawlerRequest request) {
+    private HttpUriRequest createHttpRequest(final CrawlerRequest request) {
         if (request instanceof CrawlerGetRequest) {
             return createHttpRequest((CrawlerGetRequest) request);
         }
@@ -228,13 +228,13 @@ public class HttpCrawler {
         throw new UnsupportedOperationException("Unknown request type: "+request.getClass());
     }
 
-    private HttpUriRequest createHttpRequest(CrawlerGetRequest request) {
-        HttpGet httpRequest = new HttpGet(request.getUrl());
+    private HttpUriRequest createHttpRequest(final CrawlerGetRequest request) {
+        final HttpGet httpRequest = new HttpGet(request.getUrl());
         return httpRequest;
     }
 
-    private HttpUriRequest createHttpRequest(CrawlerPostRequest request) {
-        HttpPost httpRequest = new HttpPost(request.getUrl());
+    private HttpUriRequest createHttpRequest(final CrawlerPostRequest request) {
+        final HttpPost httpRequest = new HttpPost(request.getUrl());
         HttpEntity entity = null;
         try {
             entity = new UrlEncodedFormEntity(request.getParameters(), "UTF-8");
@@ -245,26 +245,26 @@ public class HttpCrawler {
         return httpRequest;
     }
 
-    private CacheRequest getCacheRequest(CrawlerRequest request) {
-        CacheRequest cacheRequest = new CacheRequest(request.getId());
+    private CacheRequest getCacheRequest(final CrawlerRequest request) {
+        final CacheRequest cacheRequest = new CacheRequest(request.getId());
         return cacheRequest;
     }
 
-    private boolean isUpToDate(CrawlerRequest request, CacheResponse response) {
+    private boolean isUpToDate(final CrawlerRequest request, final CacheResponse response) {
         if (request.getMaxAge() == null) {
             return true;
         }
-        DateTime now = new DateTime();
-        Duration age = new Duration(response.getCached(), now);
+        final DateTime now = new DateTime();
+        final Duration age = new Duration(response.getCached(), now);
         return age.isShorterThan(request.getMaxAge());
     }
 
-    private CrawlerResponse createResponse(CacheResponse cacheResponse) {
+    private CrawlerResponse createResponse(final CacheResponse cacheResponse) {
         return createResponse(cacheResponse, false);
     }
 
-    private CrawlerResponse createResponse(CacheResponse cacheResponse, boolean stale) {
-        CrawlerResponse response = new CrawlerResponse(
+    private CrawlerResponse createResponse(final CacheResponse cacheResponse, final boolean stale) {
+        final CrawlerResponse response = new CrawlerResponse(
                 cacheResponse.getUrl(),
                 cacheResponse.getHeaders(),
                 cacheResponse.getContent(),
@@ -274,7 +274,7 @@ public class HttpCrawler {
         return response;
     }
 
-    private static void closeQuietly(HttpResponse response) {
+    private static void closeQuietly(final HttpResponse response) {
         try {
             if (response.getEntity() != null) {
                 response.getEntity().consumeContent();

@@ -37,7 +37,7 @@ public class CrawlerResponse {
     private final boolean stale;
     private final boolean fromCache;
 
-    public CrawlerResponse(URI url, List<? extends Header> headers, InputStream content, boolean fromCache, boolean stale) {
+    public CrawlerResponse(final URI url, final List<? extends Header> headers, final InputStream content, final boolean fromCache, final boolean stale) {
         this.url = url;
         this.headers = new ArrayList<Header>(headers);
         this.content = content;
@@ -68,8 +68,8 @@ public class CrawlerResponse {
         return Collections.unmodifiableList(headers);
     }
 
-    public Header getFirstHeader(String name) {
-        for (Header header : headers) {
+    public Header getFirstHeader(final String name) {
+        for (final Header header : headers) {
             if (header.getName().equalsIgnoreCase(name)) {
                 return header;
             }

@@ -36,54 +36,54 @@ import java.util.List;
  */
 public class RedisCache extends AbstractHttpCache {
 
-    private Jedis jedis;
-    private String prefix;
+    private final Jedis jedis;
+    private final String prefix;
 
-    public RedisCache(Jedis jedis, String prefix) {
+    public RedisCache(final Jedis jedis, final String prefix) {
         this.jedis = jedis;
         this.prefix = prefix;
     }
 
-    public CacheResponse get(CacheRequest request) throws IOException {
-        String id = request.getId();
-        String _id = getId(id);
+    public CacheResponse get(final CacheRequest request) throws IOException {
+        final String id = request.getId();
+        final String _id = getId(id);
 
-        URI url = URI.create(jedis.hget(_id, "url"));
-        List<Header> headers = getHeaders(jedis.hget(_id, "headers"));
-        DateTime cached = DTF.parseDateTime(jedis.hget(_id, "timestamp"));
-        ByteArrayInputStream content = new ByteArrayInputStream(jedis.hget(_id, "content").getBytes("UTF-8"));
-        CacheResponse response = new CacheResponse(id, url, headers, content, cached);
+        final URI url = URI.create(jedis.hget(_id, "url"));
+        final List<Header> headers = getHeaders(jedis.hget(_id, "headers"));
+        final DateTime cached = DTF.parseDateTime(jedis.hget(_id, "timestamp"));
+        final ByteArrayInputStream content = new ByteArrayInputStream(jedis.hget(_id, "content").getBytes("UTF-8"));
+        final CacheResponse response = new CacheResponse(id, url, headers, content, cached);
         return response;
     }
 
-    private List<Header> getHeaders(String s) {
-        List<Header> list = new ArrayList<Header>();
-        for (String line : s.split("\n")) {
-            int i = line.indexOf(':');
-            Header h = new BasicHeader(line.substring(i), line.substring(i+2));
+    private List<Header> getHeaders(final String s) {
+        final List<Header> list = new ArrayList<Header>();
+        for (final String line : s.split("\n")) {
+            final int i = line.indexOf(':');
+            final Header h = new BasicHeader(line.substring(i), line.substring(i+2));
             list.add(h);
         }
         return list;
     }
 
-    private String getId(String id) {
+    private String getId(final String id) {
         if (prefix == null) {
             return id;
         }
         return prefix + id;
     }
 
-    public void store(String id, URI url, Header[] headers, byte[] bytes) throws IOException {
-        String _id = getId(id);
+    public void store(final String id, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
+        final String _id = getId(id);
         jedis.hset(_id, "url", url.toString());
         jedis.hset(_id, "headers", getHeaderString(headers));
-        DateTime now = new DateTime();
+        final DateTime now = new DateTime();
         jedis.hset(_id, "timestamp", DTF.print(now));
         jedis.hset(_id, "content", getContentString(bytes));
     }
 
-    private String getContentString(byte[] bytes) throws IOException {
-        ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+    private String getContentString(final byte[] bytes) throws IOException {
+        final ByteArrayInputStream in = new ByteArrayInputStream(bytes);
         try {
             return readUtf8String(in);
         } finally {
@@ -91,9 +91,9 @@ public class RedisCache extends AbstractHttpCache {
         }
     }
 
-    private String getHeaderString(Header[] headers) {
-        StringBuilder s = new StringBuilder();
-        for (Header h : headers) {
+    private String getHeaderString(final Header[] headers) {
+        final StringBuilder s = new StringBuilder();
+        for (final Header h : headers) {
             s.append(h.getName()).append(": ").append(h.getValue()).append('\n');
         }
         return s.toString();

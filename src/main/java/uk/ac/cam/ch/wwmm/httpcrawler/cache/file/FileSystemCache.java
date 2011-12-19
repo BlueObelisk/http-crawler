@@ -34,7 +34,7 @@ public class FileSystemCache extends AbstractHttpCache {
 
     private final File root;
 
-    public FileSystemCache(File dir) throws IOException {
+    public FileSystemCache(final File dir) throws IOException {
         if (dir == null) {
             throw new IllegalArgumentException("Null cache directory");
         }
@@ -45,24 +45,24 @@ public class FileSystemCache extends AbstractHttpCache {
     }
 
 
-    private File getFile(String id) {
+    private File getFile(final String id) {
         return new File(root, id);
     }
 
 
-    public CacheResponse get(CacheRequest request) throws IOException {
-        File file = getFile(request.getId());
+    public CacheResponse get(final CacheRequest request) throws IOException {
+        final File file = getFile(request.getId());
         if (!file.isFile()) {
             return null;
         }
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+        final BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
         try {
-            URI url = URI.create(readLine(in));
-            DateTime cached = DTF.parseDateTime(readLine(in));
-            List<Header> headers = readHeaders(in);
-            byte[] bytes = IOUtils.toByteArray(in);
-            InputStream content = new ByteArrayInputStream(bytes);
-            CacheResponse response = new CacheResponse(request.getId(), url, headers, content, cached);
+            final URI url = URI.create(readLine(in));
+            final DateTime cached = DTF.parseDateTime(readLine(in));
+            final List<Header> headers = readHeaders(in);
+            final byte[] bytes = IOUtils.toByteArray(in);
+            final InputStream content = new ByteArrayInputStream(bytes);
+            final CacheResponse response = new CacheResponse(request.getId(), url, headers, content, cached);
             return response;
         } finally {
             in.close();
@@ -70,18 +70,18 @@ public class FileSystemCache extends AbstractHttpCache {
 
     }
 
-    public void store(String id, URI url, Header[] headers, byte[] bytes) throws IOException {
-        File file = getFile(id);
+    public void store(final String id, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
+        final File file = getFile(id);
         FileUtils.forceMkdir(file.getParentFile());
-        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+        final BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
         try {
-            Writer w = new OutputStreamWriter(out, "UTF-8");
+            final Writer w = new OutputStreamWriter(out, "UTF-8");
             w.write(url.toString());
             w.write('\n');
-            DateTime now = new DateTime();
+            final DateTime now = new DateTime();
             w.write(DTF.print(now));
             w.write('\n');
-            for (Header h : headers) {
+            for (final Header h : headers) {
                 w.write(h.getName());
                 w.write(": ");
                 w.write(h.getValue());

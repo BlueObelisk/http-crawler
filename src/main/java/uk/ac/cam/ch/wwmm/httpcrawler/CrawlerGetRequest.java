@@ -24,7 +24,7 @@ import java.net.URI;
  */
 public class CrawlerGetRequest extends CrawlerRequest {
 
-    public CrawlerGetRequest(URI url, String id, Duration maxAge) {
+    public CrawlerGetRequest(final URI url, final String id, final Duration maxAge) {
         super(url, id, maxAge);
     }
     

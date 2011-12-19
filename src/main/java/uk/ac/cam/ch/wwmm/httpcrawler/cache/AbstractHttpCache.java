@@ -39,44 +39,44 @@ public abstract class AbstractHttpCache implements HttpCache {
                     .withZone(DateTimeZone.UTC);
 
 
-    protected static List<Header> readHeaders(InputStream r) throws IOException {
-        List<Header> list = new ArrayList<Header>();
+    protected static List<Header> readHeaders(final InputStream r) throws IOException {
+        final List<Header> list = new ArrayList<Header>();
         for (String line = readLine(r); line.length() > 0; line = readLine(r)) {
-            int i = line.indexOf(": ");
-            Header h = new BasicHeader(line.substring(0, i), line.substring(i+2));
+            final int i = line.indexOf(": ");
+            final Header h = new BasicHeader(line.substring(0, i), line.substring(i+2));
             list.add(h);
         }
         return list;
     }
 
-    protected static String readLine(InputStream in) throws IOException {
-        StringBuilder s = new StringBuilder();
+    protected static String readLine(final InputStream in) throws IOException {
+        final StringBuilder s = new StringBuilder();
         for (int c = readUtf8(in); c != -1 && c != '\n'; c = readUtf8(in)) {
             s.append((char)c);
         }
         return s.toString();
     }
 
-    protected static String readUtf8String(InputStream in) throws IOException {
+    protected static String readUtf8String(final InputStream in) throws IOException {
         return IOUtils.toString(in, "UTF-8");
     }
 
-    protected static char readUtf8(InputStream in) throws IOException {
-        int c = in.read();
+    protected static char readUtf8(final InputStream in) throws IOException {
+        final int c = in.read();
         if (c == -1) {
             return (char) -1;
         }
-        int n = getUtf8Bytes(c);
+        final int n = getUtf8Bytes(c);
         if (n == 1) {
             return (char) c;
         }
         return readUtf8(in, n);
     }
 
-    protected static char readUtf8(InputStream in, int n) throws IOException {
+    protected static char readUtf8(final InputStream in, final int n) throws IOException {
         int c = 0;
         for (int i = 1; i < n; i++) {
-            int x = in.read();
+            final int x = in.read();
             if (x == -1) {
                 throw new EOFException("EOF mid UTF-8 character");
             }
@@ -94,7 +94,7 @@ public abstract class AbstractHttpCache implements HttpCache {
      * @param i0
      * @return
      */
-    protected static int getUtf8Bytes(int i0) throws IOException {
+    protected static int getUtf8Bytes(final int i0) throws IOException {
         // 0xxxxxxx
         if ((i0 & 0x80) == 0) {
             return 1;

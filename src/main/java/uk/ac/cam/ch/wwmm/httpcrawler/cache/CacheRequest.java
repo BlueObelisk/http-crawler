@@ -22,7 +22,7 @@ public class CacheRequest {
 
     private final String id;
 
-    public CacheRequest(String id) {
+    public CacheRequest(final String id) {
         this.id = id;
     }
 
