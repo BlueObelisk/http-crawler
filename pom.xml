@@ -20,6 +20,12 @@
         </repository>
     </repositories>
 
+    <scm>
+        <connection>scm:hg:https://bitbucket.org/wwmm/http-crawler</connection>
+        <developerConnection>scm:hg:https://bitbucket.org/wwmm/http-crawler</developerConnection>
+        <url>https://bitbucket.org/wwmm/http-crawler</url>
+    </scm>
+
     <developers>
         <developer>
             <name>Sam Adams</name>
