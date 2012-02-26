@@ -10,7 +10,7 @@
 
     <groupId>uk.ac.cam.ch.wwmm</groupId>
     <artifactId>httpcrawler</artifactId>
-    <version>0.1</version>
+    <version>0.2-SNAPSHOT</version>
 
     <repositories>
         <repository>
