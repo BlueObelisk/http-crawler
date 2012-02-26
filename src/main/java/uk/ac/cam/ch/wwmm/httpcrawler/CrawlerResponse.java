@@ -98,4 +98,27 @@ public class CrawlerResponse {
         return getFirstHeader("Content-type");
     }
     
+    public String getEntityAsString() throws IOException {
+        String encoding = getCharacterEncoding();
+        try {
+            return IOUtils.toString(content, encoding);
+        } finally {
+            closeQuietly();
+        }
+    }
+
+    public String getCharacterEncoding() {
+        Header contentType = getContentType();
+        if (contentType != null) {
+            // e.g. text/html; charset=utf-8
+            String value = contentType.getValue();
+            for (String s : value.split("; ")) {
+                if (s.toLowerCase().startsWith("charset=")) {
+                    return s.substring(8);
+                }
+            }
+        }
+        return null;
+    }
+
 }
