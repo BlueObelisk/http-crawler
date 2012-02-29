@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.ac.cam.ch.wwmm.httpcrawler.cache.mongo;
+package uk.ac.cam.ch.wwmm.httpcrawler.mongodb;
 
 import com.mongodb.*;
 import com.mongodb.gridfs.GridFS;

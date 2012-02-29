@@ -43,9 +43,9 @@ import java.util.List;
 /**
  * @author Sam Adams
  */
-public class HttpCrawler {
+public class DefaultHttpFetcher implements HttpFetcher {
 
-    private static final Logger LOG = Logger.getLogger(HttpCrawler.class);
+    private static final Logger LOG = Logger.getLogger(DefaultHttpFetcher.class);
 
     private final HttpCache cache;
     private final HttpClient client;
@@ -54,12 +54,12 @@ public class HttpCrawler {
     private long requestStepMillis = 1000l;
     private long lastRequestTime;
 
-    public HttpCrawler(final HttpClient client) {
+    public DefaultHttpFetcher(final HttpClient client) {
         this.client = client;
         this.cache = null;
     }
 
-    public HttpCrawler(final HttpClient client, final HttpCache cache) {
+    public DefaultHttpFetcher(final HttpClient client, final HttpCache cache) {
         this.client = client;
         this.cache = cache;
     }
@@ -115,7 +115,7 @@ public class HttpCrawler {
 
     public CrawlerResponse execute(final CrawlerRequest request) throws IOException {
 
-        if (request.getId().startsWith("null")) {
+        if (request.getId() == null || request.getId().startsWith("null")) {
             throw new IOException("Null ID: "+request.getId());
         }
 
@@ -138,6 +138,8 @@ public class HttpCrawler {
 
         final HttpUriRequest httpRequest = createHttpRequest(request);
         final HttpContext httpContext = new BasicHttpContext();
+        FetcherParams.setKey(httpContext, request.getId());
+
         HttpResponse httpResponse = null;
         int remainingAttempts = maxRetries;
         final Exception lastEx = null;
@@ -163,6 +165,7 @@ public class HttpCrawler {
                     e.printStackTrace();
                 }
             }
+
         }
         try {
 
@@ -235,14 +238,16 @@ public class HttpCrawler {
 
     private HttpUriRequest createHttpRequest(final CrawlerPostRequest request) {
         final HttpPost httpRequest = new HttpPost(request.getUrl());
-        HttpEntity entity = null;
+        httpRequest.setEntity(createEntity(request));
+        return httpRequest;
+    }
+
+    private HttpEntity createEntity(final CrawlerPostRequest request) {
         try {
-            entity = new UrlEncodedFormEntity(request.getParameters(), "UTF-8");
+            return new UrlEncodedFormEntity(request.getParameters(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("UTF-8 encoding error", e);
         }
-        httpRequest.setEntity(entity);
-        return httpRequest;
     }
 
     private CacheRequest getCacheRequest(final CrawlerRequest request) {
