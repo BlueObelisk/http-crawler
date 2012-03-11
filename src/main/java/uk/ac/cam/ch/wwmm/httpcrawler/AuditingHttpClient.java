@@ -1,10 +1,8 @@
 package uk.ac.cam.ch.wwmm.httpcrawler;
 
-import org.apache.http.HttpClientConnection;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
+import org.apache.http.*;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestExecutor;
 import uk.ac.cam.ch.wwmm.httpcrawler.audit.RequestAuditor;
@@ -54,13 +52,15 @@ public class AuditingHttpClient extends DefaultHttpClient {
 
     private void auditResponse(final HttpRequest request, final HttpContext context, final long timestamp, final HttpResponse response) {
         if (auditor != null) {
-            auditor.auditResponse(timestamp, request, response, context);
+            final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+            auditor.auditResponse(timestamp, host, request, response, context);
         }
     }
 
     private void auditError(final HttpRequest request, final HttpContext context, final long timestamp, final Throwable e) {
         if (auditor != null) {
-            auditor.auditError(timestamp, request, e, context);
+            final HttpHost host = (HttpHost) context.getAttribute(ExecutionContext.HTTP_TARGET_HOST);
+            auditor.auditError(timestamp, host, request, e, context);
         }
     }
 

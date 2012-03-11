@@ -60,7 +60,6 @@ public class HttpFetcherBuilder {
     public HttpFetcher build() {
 
         final DefaultHttpClient client = new AuditingHttpClient(requestAuditor);
-        client.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES);
         client.getParams().setParameter(ClientPNames.MAX_REDIRECTS, 5);
 
         setConnectionTimeout(client.getParams(), connectionTimeout);

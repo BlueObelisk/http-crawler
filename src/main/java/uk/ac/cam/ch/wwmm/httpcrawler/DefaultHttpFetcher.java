@@ -22,6 +22,10 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.CookiePolicy;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
@@ -139,6 +143,7 @@ public class DefaultHttpFetcher implements HttpFetcher {
         final HttpUriRequest httpRequest = createHttpRequest(request);
         final HttpContext httpContext = new BasicHttpContext();
         FetcherParams.setKey(httpContext, request.getId());
+        httpContext.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
 
         HttpResponse httpResponse = null;
         int remainingAttempts = maxRetries;
