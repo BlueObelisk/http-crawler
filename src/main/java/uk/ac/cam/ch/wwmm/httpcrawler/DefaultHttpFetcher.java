@@ -22,8 +22,6 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
@@ -43,6 +41,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+
+import static java.lang.String.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * @author Sam Adams
@@ -54,9 +57,14 @@ public class DefaultHttpFetcher implements HttpFetcher {
     private final HttpCache cache;
     private final HttpClient client;
 
-    private final int maxRetries = 3;
+    private final long maxBackoffSeconds = TimeUnit.HOURS.toSeconds(4);
+    private final int maxRetriesOnIOError = 3;
+
     private long requestStepMillis = 1000l;
     private long lastRequestTime;
+
+    private long backOffSeconds;
+    private long backOffStepSeconds = 1;
 
     public DefaultHttpFetcher(final HttpClient client) {
         this.client = client;
@@ -69,31 +77,24 @@ public class DefaultHttpFetcher implements HttpFetcher {
     }
 
     protected synchronized HttpClient getClient() {
-        if (getRequestStepMillis() > 0) {
-            sleepUntil(lastRequestTime+getRequestStepMillis());
-        }
+        final long backOffMillis = SECONDS.toMillis(backOffSeconds);
+        final long delay = (requestStepMillis > 0) ? requestStepMillis + backOffMillis : backOffMillis;
+        sleepUntil(lastRequestTime + delay);
         lastRequestTime = System.currentTimeMillis();
         return client;
     }
 
-    private void sleepUntil(final long time) {
+    private void sleepUntil(final long targetTime) {
         long now = System.currentTimeMillis();
-        while (now < time) {
-            try {
-                Thread.sleep(time - now);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                break;
-            }
+        while (now < targetTime) {
+            LockSupport.parkNanos((targetTime - now) * 1000000);
             now = System.currentTimeMillis();
         }
     }
 
-
     protected HttpCache getCache() {
         return cache;
     }
-
 
     public long getRequestStepMillis() {
         return requestStepMillis;
@@ -146,7 +147,7 @@ public class DefaultHttpFetcher implements HttpFetcher {
         httpContext.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
 
         HttpResponse httpResponse = null;
-        int remainingAttempts = maxRetries;
+        int remainingAttempts = maxRetriesOnIOError;
         final Exception lastEx = null;
         while (httpResponse == null && remainingAttempts > 0) {
             remainingAttempts--;
@@ -154,25 +155,30 @@ public class DefaultHttpFetcher implements HttpFetcher {
                 LOG.debug("Issuing HTTP "+httpRequest.getMethod()+" "+httpRequest.getURI());
                 httpResponse = getClient().execute(httpRequest, httpContext);
             } catch (IOException e) {
+                backOff();
                 LOG.warn("Error fetching "+httpRequest.getURI()
+                        + " Back-off for " + backOffSeconds + " seconds"
                         + (remainingAttempts > 0 ? " [retrying]" : ""), e);
                 if (remainingAttempts == 0) {
                     if (cacheResponse != null) {
                         // Return stale response
-                        LOG.error("Failed to fetch "+httpRequest.getURI()+" ... using stale version", lastEx);
+                        LOG.error("Failed to fetch " + httpRequest.getURI() + " ... using stale version", lastEx);
                         return createResponse(cacheResponse, true);
                     }
                     throw new IOException("Failed to fetch "+httpRequest.getURI(), lastEx);
-                }
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e1) {
-                    e.printStackTrace();
                 }
             }
 
         }
         try {
+
+            if (httpResponse.getStatusLine().getStatusCode() >= 500) {
+                backOff();
+                LOG.warn(format("HTTP Status %d (%s).  Back-off for %d seconds", httpResponse.getStatusLine().getStatusCode(),
+                    httpResponse.getStatusLine().getReasonPhrase(), backOffSeconds));
+            } else {
+                resetBackOff();
+            }
 
             if (isSuccess(httpResponse)) {
                 final URI url = getResponseUrl(httpRequest, httpContext);
@@ -188,6 +194,18 @@ public class DefaultHttpFetcher implements HttpFetcher {
         } finally {
             closeQuietly(httpResponse);
         }
+    }
+
+    private void backOff() {
+        long tmp = backOffSeconds;
+        backOffSeconds = Math.min(maxBackoffSeconds, backOffSeconds + backOffStepSeconds);
+        backOffStepSeconds = tmp;
+        // 1 1 2 3 5
+    }
+
+    private void resetBackOff() {
+        backOffSeconds = 0;
+        backOffStepSeconds = 1;
     }
 
 
