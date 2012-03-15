@@ -27,5 +27,9 @@ public class CrawlerGetRequest extends CrawlerRequest {
     public CrawlerGetRequest(final URI url, final String id, final Duration maxAge) {
         super(url, id, maxAge);
     }
+
+    public CrawlerGetRequest(final URI url, final String id, final Duration maxAge, final URI referrer) {
+        super(url, id, maxAge, referrer);
+    }
     
 }

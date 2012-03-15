@@ -27,11 +27,17 @@ public abstract class CrawlerRequest {
     private final String id;
     private final URI url;
     private final Duration maxAge;
+    private final URI referrer;
 
     public CrawlerRequest(final URI url, final String id, final Duration maxAge) {
+        this(url, id, maxAge, null);
+    }
+    
+    public CrawlerRequest(final URI url, final String id, final Duration maxAge, final URI referrer) {
         this.url = url;
         this.id = id;
         this.maxAge = maxAge;
+        this.referrer = referrer;
     }
 
     public String getId() {
@@ -44,6 +50,10 @@ public abstract class CrawlerRequest {
 
     public Duration getMaxAge() {
         return maxAge;
+    }
+
+    public URI getReferrer() {
+        return referrer;
     }
 
 }

@@ -227,13 +227,25 @@ public class DefaultHttpFetcher implements HttpFetcher {
     }
 
     private HttpUriRequest createHttpRequest(final CrawlerRequest request) {
+        final HttpUriRequest httpRequest;
         if (request instanceof CrawlerGetRequest) {
-            return createHttpRequest((CrawlerGetRequest) request);
+            httpRequest = createHttpRequest((CrawlerGetRequest) request);
         }
-        if (request instanceof CrawlerPostRequest) {
-            return createHttpRequest((CrawlerPostRequest) request);
+        else if (request instanceof CrawlerPostRequest) {
+            httpRequest = createHttpRequest((CrawlerPostRequest) request);
         }
-        throw new UnsupportedOperationException("Unknown request type: "+request.getClass());
+        else {
+            throw new UnsupportedOperationException("Unknown request type: "+request.getClass());
+        }
+        if (request.getReferrer() != null) {
+            String referer = request.getReferrer().toString();
+            if (referer.indexOf('#') != -1) {
+                // Remove fragment
+                referer = referer.substring(0, referer.indexOf('#'));
+            }
+            httpRequest.addHeader("Referer", referer);
+        }
+        return httpRequest;
     }
 
     private HttpUriRequest createHttpRequest(final CrawlerGetRequest request) {
