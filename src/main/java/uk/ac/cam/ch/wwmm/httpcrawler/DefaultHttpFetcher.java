@@ -119,6 +119,10 @@ public class DefaultHttpFetcher implements HttpFetcher {
 
 
     public CrawlerResponse execute(final CrawlerRequest request) throws IOException {
+        return execute(request, null);
+    }
+
+    public CrawlerResponse execute(final CrawlerRequest request, final HttpContext context) throws IOException {
 
         if (request.getId() == null || request.getId().startsWith("null")) {
             throw new IOException("Null ID: "+request.getId());
@@ -142,9 +146,8 @@ public class DefaultHttpFetcher implements HttpFetcher {
         }
 
         final HttpUriRequest httpRequest = createHttpRequest(request);
-        final HttpContext httpContext = new BasicHttpContext();
+        final HttpContext httpContext = context == null ? createContext() : context;
         FetcherParams.setKey(httpContext, request.getId());
-        httpContext.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
 
         HttpResponse httpResponse = null;
         int remainingAttempts = maxRetriesOnIOError;
@@ -171,7 +174,6 @@ public class DefaultHttpFetcher implements HttpFetcher {
 
         }
         try {
-
             if (httpResponse.getStatusLine().getStatusCode() >= 500) {
                 backOff();
                 LOG.warn(format("HTTP Status %d (%s).  Back-off for %d seconds", httpResponse.getStatusLine().getStatusCode(),
@@ -194,6 +196,12 @@ public class DefaultHttpFetcher implements HttpFetcher {
         } finally {
             closeQuietly(httpResponse);
         }
+    }
+
+    private HttpContext createContext() {
+        final HttpContext httpContext = new BasicHttpContext();
+        httpContext.setAttribute(ClientContext.COOKIE_STORE, new BasicCookieStore());
+        return httpContext;
     }
 
     private void backOff() {
