@@ -60,9 +60,12 @@ public class MongoCache extends AbstractHttpCache {
             final URI url = URI.create((String) file.get("url"));
             final BasicDBList list = (BasicDBList) file.get("headers");
             final List<Header> headers = getHeaders(list);
-            final DateTime cached = DTF.parseDateTime((String) file.get("timestamp"));
+            final DateTime cached = DATETIME_FORMATTER.parseDateTime((String) file.get("timestamp"));
             final InputStream in = new GZIPInputStream(file.getInputStream());
             final CacheResponse response = new CacheResponse(filename, url, headers, in, cached);
+
+            file.put("last_accessed", System.currentTimeMillis());
+            file.save();
             return response;
         }
         return null;
@@ -91,7 +94,8 @@ public class MongoCache extends AbstractHttpCache {
         file.setFilename(filename);
         file.put("url", url.toString());
         file.put("headers", getHeaderStrings(headers));
-        file.put("timestamp", DTF.print(timestamp));
+        file.put("timestamp", DATETIME_FORMATTER.print(timestamp));
+        file.put("last_accessed", System.currentTimeMillis());
         fs.remove(filename);
         file.save();
     }
