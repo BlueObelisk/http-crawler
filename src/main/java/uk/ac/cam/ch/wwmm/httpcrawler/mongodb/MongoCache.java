@@ -64,7 +64,7 @@ public class MongoCache extends AbstractHttpCache {
             final InputStream in = new GZIPInputStream(file.getInputStream());
             final CacheResponse response = new CacheResponse(filename, url, headers, in, cached);
 
-            file.put("last_accessed", System.currentTimeMillis());
+            file.put("last_accessed", DATETIME_FORMATTER.print(System.currentTimeMillis()));
             file.save();
             return response;
         }
@@ -95,7 +95,7 @@ public class MongoCache extends AbstractHttpCache {
         file.put("url", url.toString());
         file.put("headers", getHeaderStrings(headers));
         file.put("timestamp", DATETIME_FORMATTER.print(timestamp));
-        file.put("last_accessed", System.currentTimeMillis());
+        file.put("last_accessed", DATETIME_FORMATTER.print(System.currentTimeMillis()));
         fs.remove(filename);
         file.save();
     }

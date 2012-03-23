@@ -35,7 +35,7 @@ import java.util.List;
 public abstract class AbstractHttpCache implements HttpCache {
 
     public static final DateTimeFormatter DATETIME_FORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z")
+            DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z")
                     .withZone(DateTimeZone.UTC);
 
 
