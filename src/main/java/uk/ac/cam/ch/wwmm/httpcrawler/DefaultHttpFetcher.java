@@ -189,7 +189,6 @@ public class DefaultHttpFetcher implements HttpFetcher {
                 cacheResponse(request.getId(), url, headers, bytes);
                 return createResponse(url, headers, bytes, false, false);
             } else {
-                httpResponse.getEntity().writeTo(System.err);
                 throw new IOException("Crawler failed ["+request.getUrl()+"] "+httpResponse.getStatusLine());
             }
 
