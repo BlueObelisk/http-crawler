@@ -174,7 +174,7 @@ public class DefaultHttpFetcher implements HttpFetcher {
 
         }
         try {
-            if (httpResponse.getStatusLine().getStatusCode() >= 500) {
+            if (httpResponse.getStatusLine().getStatusCode() >= 400) {
                 backOff();
                 LOG.warn(format("HTTP Status %d (%s).  Back-off for %d seconds", httpResponse.getStatusLine().getStatusCode(),
                     httpResponse.getStatusLine().getReasonPhrase(), backOffSeconds));
