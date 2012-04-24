@@ -20,6 +20,7 @@ import org.apache.http.Header;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 /**
  * @author Sam Adams
@@ -28,6 +29,6 @@ public interface HttpCache {
 
     CacheResponse get(CacheRequest request) throws IOException;
 
-    void store(String id, URI url, Header[] headers, byte[] bytes) throws IOException;
+    void store(String id, URI url, List<Header> headers, byte[] bytes) throws IOException;
 
 }

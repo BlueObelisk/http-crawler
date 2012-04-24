@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -219,7 +220,7 @@ public class DefaultHttpFetcher implements HttpFetcher {
     private void cacheResponse(final String id, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
         if (getCache() != null) {
             LOG.trace("Cached: "+id);
-            getCache().store(id, url, headers, bytes);
+            getCache().store(id, url, asList(headers), bytes);
         }
     }
 

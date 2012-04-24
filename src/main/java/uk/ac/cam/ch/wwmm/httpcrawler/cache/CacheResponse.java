@@ -16,6 +16,8 @@
 package uk.ac.cam.ch.wwmm.httpcrawler.cache;
 
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.NameValuePair;
 import org.joda.time.DateTime;
 
 import java.io.InputStream;
@@ -61,4 +63,26 @@ public class CacheResponse {
         return cached;
     }
     
+    public Header getContentTypeHeader() {
+        for (final Header header : headers) {
+            if ("Content-Type".equalsIgnoreCase(header.getName())) {
+                return header;
+            }
+        }
+        return null;
+    }
+    
+    public String getCharSet() {
+        final Header contentType = getContentTypeHeader();
+        if (contentType != null) {
+            final HeaderElement values[] = contentType.getElements();
+            if (values.length > 0) {
+                final NameValuePair param = values[0].getParameterByName("charset");
+                if (param != null) {
+                    return param.getValue();
+                }
+            }
+        }
+        return null;
+    }
 }

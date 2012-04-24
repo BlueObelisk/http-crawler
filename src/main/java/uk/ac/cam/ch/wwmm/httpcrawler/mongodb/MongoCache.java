@@ -82,12 +82,12 @@ public class MongoCache extends AbstractHttpCache {
         return list;
     }
 
-    public void store(final String filename, final URI url, final Header[] headers, final byte[] bytes) throws IOException {
+    public void store(final String filename, final URI url, final List<Header> headers, final byte[] bytes) throws IOException {
         final DateTime now = new DateTime();
         store(filename, url, headers, now, bytes);
     }
 
-    public void store(final String filename, final URI url, final Header[] headers, final DateTime timestamp, final byte[] bytes) throws IOException {
+    public void store(final String filename, final URI url, final List<Header> headers, final DateTime timestamp, final byte[] bytes) throws IOException {
         final byte[] content = compress(bytes);
 
         final GridFSInputFile file = fs.createFile(content);
@@ -108,7 +108,7 @@ public class MongoCache extends AbstractHttpCache {
         return buffer.toByteArray();
     }
 
-    private List<String> getHeaderStrings(final Header[] headers) {
+    private List<String> getHeaderStrings(List<Header> headers) {
         final List<String> list = new ArrayList<String>();
         for (final Header h : headers) {
             list.add(h.getName() + ": " + h.getValue());
