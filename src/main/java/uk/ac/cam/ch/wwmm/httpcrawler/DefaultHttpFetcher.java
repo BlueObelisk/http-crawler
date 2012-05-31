@@ -135,7 +135,7 @@ public class DefaultHttpFetcher implements HttpFetcher {
             final CacheRequest cacheRequest = getCacheRequest(request);
             cacheResponse = cache.get(cacheRequest);
             if (cacheResponse != null) {
-                if (isUpToDate(request, cacheResponse)) {
+                if (cacheResponse.isUpToDate(request.getMaxAge())) {
                     LOG.trace("Cache hit: "+request.getId());
                     return createResponse(cacheResponse);
                 } else {
@@ -296,15 +296,6 @@ public class DefaultHttpFetcher implements HttpFetcher {
     private CacheRequest getCacheRequest(final CrawlerRequest request) {
         final CacheRequest cacheRequest = new CacheRequest(request.getId());
         return cacheRequest;
-    }
-
-    private boolean isUpToDate(final CrawlerRequest request, final CacheResponse response) {
-        if (request.getMaxAge() == null) {
-            return true;
-        }
-        final DateTime now = new DateTime();
-        final Duration age = new Duration(response.getCached(), now);
-        return age.isShorterThan(request.getMaxAge());
     }
 
     private CrawlerResponse createResponse(final CacheResponse cacheResponse) {

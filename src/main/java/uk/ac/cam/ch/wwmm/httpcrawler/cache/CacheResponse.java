@@ -19,6 +19,7 @@ import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -61,6 +62,15 @@ public class CacheResponse {
 
     public DateTime getCached() {
         return cached;
+    }
+
+    public boolean isUpToDate(final Duration maxAge) {
+        if (maxAge == null) {
+            return true;
+        }
+        final DateTime now = new DateTime();
+        final Duration age = new Duration(getCached(), now);
+        return age.isShorterThan(maxAge);
     }
     
     public Header getContentTypeHeader() {
