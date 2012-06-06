@@ -20,6 +20,7 @@ import org.joda.time.Duration;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +34,11 @@ public class CrawlerPostRequest extends CrawlerRequest {
     public CrawlerPostRequest(final URI uri, final List<? extends NameValuePair> parameters, final String id, final Duration maxAge) {
         super(uri, id, maxAge);
         this.parameters = new ArrayList<NameValuePair>(parameters);
+    }
+
+    public CrawlerPostRequest(final URI uri, final String id, final Duration maxAge, final NameValuePair... parameters) {
+        super(uri, id, maxAge);
+        this.parameters = Arrays.asList(parameters);
     }
 
     public List<NameValuePair> getParameters() {
