@@ -17,19 +17,19 @@ package uk.ac.cam.ch.wwmm.httpcrawler;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.Duration;
 import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheRequest;
 import uk.ac.cam.ch.wwmm.httpcrawler.cache.CacheResponse;
 import uk.ac.cam.ch.wwmm.httpcrawler.cache.HttpCache;
@@ -55,11 +55,12 @@ public class DefaultHttpFetcher implements HttpFetcher {
 
     private static final Logger LOG = Logger.getLogger(DefaultHttpFetcher.class);
 
+    private static final int MAX_RETRIES_ON_IO_ERROR = 3;
+
     private final HttpCache cache;
     private final HttpClient client;
 
     private final long maxBackoffSeconds = TimeUnit.HOURS.toSeconds(4);
-    private final int maxRetriesOnIOError = 3;
 
     private long requestStepMillis = 1000l;
     private long lastRequestTime;
@@ -146,12 +147,20 @@ public class DefaultHttpFetcher implements HttpFetcher {
             }
         }
 
-        final HttpUriRequest httpRequest = createHttpRequest(request);
         final HttpContext httpContext = context == null ? createContext() : context;
         FetcherParams.setKey(httpContext, request.getId());
 
+        final HttpUriRequest httpRequest = createHttpRequest(request);
+        if (request.getCookies() != null && !request.getCookies().isEmpty())
+        {
+            final CookieStore cookieStore = getCookieStore(httpContext);
+            for (final Cookie cookie : request.getCookies()) {
+                cookieStore.addCookie(cookie);
+            }
+        }
+
         HttpResponse httpResponse = null;
-        int remainingAttempts = maxRetriesOnIOError;
+        int remainingAttempts = MAX_RETRIES_ON_IO_ERROR;
         final Exception lastEx = null;
         while (httpResponse == null && remainingAttempts > 0) {
             remainingAttempts--;
@@ -196,6 +205,10 @@ public class DefaultHttpFetcher implements HttpFetcher {
         } finally {
             closeQuietly(httpResponse);
         }
+    }
+
+    private CookieStore getCookieStore(final HttpContext context) {
+        return (CookieStore) context.getAttribute(ClientContext.COOKIE_STORE);
     }
 
     private HttpContext createContext() {

@@ -15,9 +15,11 @@
  */
 package uk.ac.cam.ch.wwmm.httpcrawler;
 
+import org.apache.http.cookie.Cookie;
 import org.joda.time.Duration;
 
 import java.net.URI;
+import java.util.Collection;
 
 /**
  * @author Sam Adams
@@ -28,8 +30,8 @@ public class CrawlerGetRequest extends CrawlerRequest {
         super(url, id, maxAge);
     }
 
-    public CrawlerGetRequest(final URI url, final String id, final Duration maxAge, final URI referrer) {
-        super(url, id, maxAge, referrer);
+    public CrawlerGetRequest(final URI url, final String id, final Duration maxAge, final URI referrer, final Collection<Cookie> cookies) {
+        super(url, id, maxAge, referrer, cookies);
     }
     
 }

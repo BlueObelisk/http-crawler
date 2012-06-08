@@ -2,7 +2,6 @@ package uk.ac.cam.ch.wwmm.httpcrawler;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.params.ClientPNames;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
 import uk.ac.cam.ch.wwmm.httpcrawler.audit.RequestAuditor;

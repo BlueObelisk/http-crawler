@@ -13,6 +13,7 @@ import uk.ac.cam.ch.wwmm.httpcrawler.audit.RequestAuditor;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -55,6 +56,7 @@ public class MongoRequestAuditor implements RequestAuditor {
             final HttpUriRequest httpUriRequest = (HttpUriRequest) request;
             o.put("url", httpUriRequest.getURI().toString());
             o.put("method", httpUriRequest.getMethod());
+            o.put("headers", Arrays.toString(httpUriRequest.getAllHeaders()));
         }
     }
 
